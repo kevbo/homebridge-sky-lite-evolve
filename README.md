@@ -12,7 +12,7 @@
 ## Description
 
 A [Homebridge](https://homebridge.io/) plugin for the [BlissLights Sky Lite Evolve&reg;](https://blisslights.com/products/sky-lite-evolve)
-star projector. [Seydx](https://github.com/seydx) has a [excellent plugin](https://github.com/seydx/homebridge-star-projector/tree/master)
+star projector. [Seydx](https://github.com/seydx) has an [excellent plugin](https://github.com/seydx/homebridge-star-projector/tree/master)
 for the general category of Tuya-based star projectors, but I have not been able to get it working. Playing around in the
 [Tuya IoT Cloud](https://iot.tuya.com/), I can't find DPS values for any of the characteristics of the Evolve. Hence, this plugin. That
 said, this plugin borrows heavily in concept from Seydx's, particularly in how the accessories are mapped.
