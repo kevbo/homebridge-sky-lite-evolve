@@ -39,7 +39,7 @@ Once installed, go to the plugins tab and click the configuration button in the 
 
 If you haven't already done so, you will need to create a [Tuya IoT Cloud](https://iot.tuya.com/) account and create a cloud project
 containing your device(s). Your cloud project will have an access key and a secret key, and your device will be given a virtual device id.
-You will need these three values in order to configure this plugin. The TuyAPI project has[some good instructions](https://github.com/codetheweb/tuyapi/blob/master/docs/SETUP.md#listing-tuya-devices-from-the-tuya-smart-or-smart-life-apps) on how to set this all up. Note that this may require that you 
+You will need these three values in order to configure this plugin. The TuyAPI project has [some good instructions](https://github.com/codetheweb/tuyapi/blob/master/docs/SETUP.md#listing-tuya-devices-from-the-tuya-smart-or-smart-life-apps) on how to set this all up. Note that this may require that you 
 set up your device via the Tuya Smart app and not the BlissHome app, but this does not reduce the functionality of your device.
 
 Alternately, you can install it manually from the command line:
