@@ -1,16 +1,152 @@
 {
-  "pluginAlias": "ExampleHomebridgePlugin",
+  "pluginAlias": "HomebridgeSkyLiteEvolve",
   "pluginType": "platform",
   "singular": true,
+  "headerDisplay": "For documentation please see the [GitHub repository](https://github.com/kevbo/homebridge-sky-lite-evolve)",
+  "footerDisplay": "Plugin by [Kevin Boers](https://www.kevbo.us)",
   "schema": {
     "type": "object",
     "properties": {
-      "name": {
-        "title": "Name",
-        "type": "string",
-        "required": true,
-        "default": "Example Dynamic Platform"
+      "cloud_credentials": {
+        "title": "Cloud Credentials",
+        "type": "object",
+        "properties": {
+          "tuya_region": {
+            "title": "Tuya IoT Regional Endpoint",
+            "type": "string",
+            "required": true,
+            "default": "https://openapi.tuyaus.com",
+            "description": "This is the region in which your Tuya Cloud Project lives. If you are in the Western America Data Center, use the default. Otherwise, make sure to find the URL for your region: https://developer.tuya.com/en/docs/iot/api-request?id=Ka4a8uuo1j4t4#title-1-Endpoints"
+          },
+          "tuya_access_key": {
+            "title": "Tuya IoT Access Key",
+            "type": "string",
+            "required": true,
+            "description": "The Access ID/Client ID from your cloud project Overview tab"
+          },
+          "tuya_secret_key": {
+            "title": "Tuya IoT Secret Key",
+            "type": "string",
+            "required": true,
+            "description": "The Access Secret/Client Secret from your cloud project Overview tab"
+          }
+        }
+      },
+      "projectors": {
+        "type": "array",
+        "items": {
+          "title": "Projectors",
+          "type": "object",
+          "properties": {
+            "name": {
+              "title": "Name",
+              "type": "string",
+              "required": true,
+              "default": "Evolve",
+              "description": "This is what will appear in the Apple Home app for this projector"
+            },
+            "tuya_device_id": {
+              "title": "Tuya IoT Device ID",
+              "type": "string",
+              "required": true,
+              "description": "The Device ID from your cloud project Devices tab"
+            },
+            "manufacturer": {
+              "title": "Manufacturer",
+              "type": "string",
+              "required": true,
+              "default": "BlissLights",
+              "description": "This is what will appear in the Apple Home app for this accessory"
+            },
+            "model": {
+              "title": "Model",
+              "type": "string",
+              "required": true,
+              "default": "Sky Lite Evolve",
+              "description": "This is what will appear in the Apple Home app for this accessory"
+            },
+            "serial_number": {
+              "title": "Serial Number",
+              "type": "string",
+              "required": true,
+              "default": "Example Serial Number",
+              "description": "This is what will appear in the Apple Home app for this accessory"
+            }
+          }
+        }
+      },
+      "advanced_settings": {
+        "title": "Advanced Settings",
+        "type": "object",
+        "properties": {
+          "polling_interval": {
+            "title": "Polling Interval",
+            "type": "number",
+            "required": true,
+            "default": 1000,
+            "description": "Polling interval in milliseconds"
+          },
+          "max_api_retries": {
+            "title": "Max API Retries",
+            "type": "number",
+            "required": true,
+            "default": 5,
+            "description": "Max number of times to retry API calls"
+          }
+        }
       }
     }
-  }
+  },
+  "layout": [
+    {
+      "key": "cloud_credentials",
+      "type": "section",
+      "orderable": false,
+      "title": "Cloud Credentials",
+      "expandable": true,
+      "expanded": false,
+      "items": [
+        "cloud_credentials.tuya_region",
+        "cloud_credentials.tuya_access_key",
+        "cloud_credentials.tuya_secret_key"
+      ]
+    },
+    {
+      "type": "section",
+      "orderable": false,
+      "title": "Projectors",
+      "expandable": true,
+      "expanded": false,
+      "items": [
+        {
+          "key": "projectors",
+          "type": "array",
+          "orderable": false,
+          "buttonText": "Add Projector",
+          "title": "Projector",
+          "expandable": true,
+          "expanded": false,
+          "items": [
+            "projectors[].name",
+            "projectors[].tuya_device_id",
+            "projectors[].manufacturer",
+            "projectors[].model",
+            "projectors[].serial_number"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "advanced_settings",
+      "type": "section",
+      "orderable": false,
+      "title": "Advanced Settings",
+      "expandable": true,
+      "expanded": false,
+      "items": [
+        "advanced_settings.polling_interval",
+        "advanced_settings.max_api_retries"
+      ]
+    }
+  ]
 }

@@ -1,191 +1,70 @@
-<p align="center">
+<div align="center">
+    <img src="sky-lite-evolve.png" alt="PNG Image of the BlissLights Sky Lite Evolve Star Projector">
+</div>
 
-<img src="https://github.com/homebridge/branding/raw/latest/logos/homebridge-wordmark-logo-vertical.png" width="150">
+# Homebridge Sky Lite Evolve
 
-</p>
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![npm](https://img.shields.io/npm/v/homebridge-sky-lite-evolve.svg?style=flat-square)](https://www.npmjs.com/package/homebridge-sky-lite-evolve)
+[![npm](https://img.shields.io/npm/dt/homebridge-sky-lite-evolve.svg?style=flat-square)](https://www.npmjs.com/package/homebridge-sky-lite-evolve)
+[![GitHub last commit](https://img.shields.io/github/last-commit/kevbo/homebridge-sky-lite-evolve.svg?style=flat-square)](https://github.com/kevbo/homebridge-sky-lite-evolve)
 
-<span align="center">
+## Description
 
-# Homebridge Platform Plugin Template
+A [Homebridge](https://homebridge.io/) plugin for the [BlissLights Sky Lite Evolve&reg;](https://blisslights.com/products/sky-lite-evolve)
+star projector. [Seydx](https://github.com/seydx) has a [excellent plugin](https://github.com/seydx/homebridge-star-projector/tree/master)
+for the general category of Tuya-based star projectors, but I have not been able to get it working. Playing around in the
+[Tuya IoT Cloud](https://iot.tuya.com/), I can't find DPS values for any of the characteristics of the Evolve. Hence, this plugin. That
+said, this plugin borrows heavily in concept from Seydx's, particularly in how the accessories are mapped.
 
-</span>
+One thing that is important to note is that, instead of local or remote control using DPS values, this plugin uses the Tuya API directly to
+issue device commands via the Tuya IoT Cloud.
 
-This is a template Homebridge dynamic platform plugin and can be used as a base to help you get started developing your own plugin.
+This plugin exposes the following accessories to HomeKit:
 
-This template should be used in conjunction with the [developer documentation](https://developers.homebridge.io/). A full list of all supported service types, and their characteristics is available on this site.
+- A power switch
+- That's it for now. I'm working on adding more services to this accessory, for the colors, laser, rotation, etc.
 
-### Clone As Template
+## Table of Contents
 
-Click the link below to create a new GitHub Repository using this template, or click the *Use This Template* button above.
+- [Installation](#installation)
+- [Usage](#usage)
+- [Contributing](#contributing)
+- [License](#license)
 
-<span align="center">
+## Installation
 
-### [Create New Repository From Template](https://github.com/homebridge/homebridge-plugin-template/generate)
+In Homebridge, on the plugins tab, search for homebridge-sky-lite-evolve and then click the download/install icon on the result from @kevbo.
+Once installed, go to the plugins tab and click the configuration button in the upper right corner of the card.
 
-</span>
+If you haven't already done so, you will need to create a [Tuya IoT Cloud](https://iot.tuya.com/) account and create a cloud project
+containing your device(s). Your cloud project will have an access key and a secret key, and your device will be given a virtual device id.
+You will need these three values in order to configure this plugin. The TuyAPI project has[some good instructions](https://github.com/codetheweb/tuyapi/blob/master/docs/SETUP.md#listing-tuya-devices-from-the-tuya-smart-or-smart-life-apps) on how to set this all up. Note that this may require that you 
+set up your device via the Tuya Smart app and not the BlissHome app, but this does not reduce the functionality of your device.
 
-### Setup Development Environment
+Alternately, you can install it manually from the command line:
 
-To develop Homebridge plugins you must have Node.js 18 or later installed, and a modern code editor such as [VS Code](https://code.visualstudio.com/). This plugin template uses [TypeScript](https://www.typescriptlang.org/) to make development easier and comes with pre-configured settings for [VS Code](https://code.visualstudio.com/) and ESLint. If you are using VS Code install these extensions:
+    sudo npm i -g homebridge-sky-lite-evolve@latest
 
-- [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
+## Usage
 
-### Install Development Dependencies
+After installation and configuration, you should now see the Evolve switch accessory on the Homebridge accessories tab. Assumming you've
+registered your Homebridge instance as a HomeKit bridge through your iOS/iPadOS Home app, you should see it there, too.
 
-Using a terminal, navigate to the project folder and run this command to install the development dependencies:
+## Contributing
 
-```shell
-$ npm install
-```
+You can contribute to this Homebridge plugin in a number of ways:
 
-### Update package.json
+- [Report issues](https://github.com/kevbo/homebridge-sky-lite-evolve/issues) and help verify Pull Requests as they are merged
+- Help review [Pull Requests](https://github.com/kevbo/homebridge-sky-lite-evolve/pulls)
+- Contribute bug fixes
+- Contribute changes to extend the capabilities of this plugin
 
-Open the [`package.json`](./package.json) and change the following attributes:
+## Credits
 
-- `name` - this should be prefixed with `homebridge-` or `@username/homebridge-`, is case-sensitive, and contains no spaces nor special characters apart from a dash `-`
-- `displayName` - this is the "nice" name displayed in the Homebridge UI
-- `repository.url` - Link to your GitHub repo
-- `bugs.url` - Link to your GitHub repo issues page
+- I'd like to thank [Seydx](https://github.com/seydx) for his [homebridge-star-projector plugin](https://github.com/seydx/homebridge-star-projector),
+which I used as a template for the accessory layout.
 
-When you are ready to publish the plugin you should set `private` to false, or remove the attribute entirely.
+## License
 
-### Update Plugin Defaults
-
-Open the [`src/settings.ts`](./src/settings.ts) file and change the default values:
-
-- `PLATFORM_NAME` - Set this to be the name of your platform. This is the name of the platform that users will use to register the plugin in the Homebridge `config.json`.
-- `PLUGIN_NAME` - Set this to be the same name you set in the [`package.json`](./package.json) file. 
-
-Open the [`config.schema.json`](./config.schema.json) file and change the following attribute:
-
-- `pluginAlias` - set this to match the `PLATFORM_NAME` you defined in the previous step.
-
-### Build Plugin
-
-TypeScript needs to be compiled into JavaScript before it can run. The following command will compile the contents of your [`src`](./src) directory and put the resulting code into the `dist` folder.
-
-```shell
-$ npm run build
-```
-
-### Link To Homebridge
-
-Run this command so your global installation of Homebridge can discover the plugin in your development environment:
-
-```shell
-$ npm link
-```
-
-You can now start Homebridge, use the `-D` flag, so you can see debug log messages in your plugin:
-
-```shell
-$ homebridge -D
-```
-
-### Watch For Changes and Build Automatically
-
-If you want to have your code compile automatically as you make changes, and restart Homebridge automatically between changes, you first need to add your plugin as a platform in `~/.homebridge/config.json`:
-```
-{
-...
-    "platforms": [
-        {
-            "name": "Config",
-            "port": 8581,
-            "platform": "config"
-        },
-        {
-            "name": "<PLUGIN_NAME>",
-            //... any other options, as listed in config.schema.json ...
-            "platform": "<PLATFORM_NAME>"
-        }
-    ]
-}
-```
-
-and then you can run:
-
-```shell
-$ npm run watch
-```
-
-This will launch an instance of Homebridge in debug mode which will restart every time you make a change to the source code. It will load the config stored in the default location under `~/.homebridge`. You may need to stop other running instances of Homebridge while using this command to prevent conflicts. You can adjust the Homebridge startup command in the [`nodemon.json`](./nodemon.json) file.
-
-### Customise Plugin
-
-You can now start customising the plugin template to suit your requirements.
-
-- [`src/platform.ts`](./src/platform.ts) - this is where your device setup and discovery should go.
-- [`src/platformAccessory.ts`](./src/platformAccessory.ts) - this is where your accessory control logic should go, you can rename or create multiple instances of this file for each accessory type you need to implement as part of your platform plugin. You can refer to the [developer documentation](https://developers.homebridge.io/) to see what characteristics you need to implement for each service type.
-- [`config.schema.json`](./config.schema.json) - update the config schema to match the config you expect from the user. See the [Plugin Config Schema Documentation](https://developers.homebridge.io/#/config-schema).
-
-### Versioning Your Plugin
-
-Given a version number `MAJOR`.`MINOR`.`PATCH`, such as `1.4.3`, increment the:
-
-1. **MAJOR** version when you make breaking changes to your plugin,
-2. **MINOR** version when you add functionality in a backwards compatible manner, and
-3. **PATCH** version when you make backwards compatible bug fixes.
-
-You can use the `npm version` command to help you with this:
-
-```shell
-# major update / breaking changes
-$ npm version major
-
-# minor update / new features
-$ npm version update
-
-# patch / bugfixes
-$ npm version patch
-```
-
-### Publish Package
-
-When you are ready to publish your plugin to [npm](https://www.npmjs.com/), make sure you have removed the `private` attribute from the [`package.json`](./package.json) file then run:
-
-```shell
-$ npm publish
-```
-
-If you are publishing a scoped plugin, i.e. `@username/homebridge-xxx` you will need to add `--access=public` to command the first time you publish.
-
-#### Publishing Beta Versions
-
-You can publish *beta* versions of your plugin for other users to test before you release it to everyone.
-
-```shell
-# create a new pre-release version (eg. 2.1.0-beta.1)
-$ npm version prepatch --preid beta
-
-# publish to @beta
-$ npm publish --tag=beta
-```
-
-Users can then install the  *beta* version by appending `@beta` to the install command, for example:
-
-```shell
-$ sudo npm install -g homebridge-example-plugin@beta
-```
-
-### Best Practices
-Consider creating your plugin with the [Homebridge Verified](https://github.com/homebridge/verified) criteria in mind. This will help you to create a plugin that is easy to use and works well with Homebridge.
-You can then submit your plugin to the Homebridge Verified list for review.
-The most up-to-date criteria can be found [here](https://github.com/homebridge/verified#requirements).
-For reference, the current criteria are:
-
-- The plugin must successfully install.
-- The plugin must implement the [Homebridge Plugin Settings GUI](https://github.com/oznu/homebridge-config-ui-x/wiki/Developers:-Plugin-Settings-GUI).
-- The plugin must not start unless it is configured.
-- The plugin must not execute post-install scripts that modify the users' system in any way.
-- The plugin must not contain any analytics or calls that enable you to track the user.
-- The plugin must not throw unhandled exceptions, the plugin must catch and log its own errors.
-- The plugin must be published to npm and the source code available on GitHub.
-  - A GitHub release - with patch notes - should be created for every new version of your plugin.
-- The plugin must run on all [supported LTS versions of Node.js](https://github.com/homebridge/homebridge/wiki/How-To-Update-Node.js), at the time of writing this is Node.js v16 and v18.
-- The plugin must not require the user to run Homebridge in a TTY or with non-standard startup parameters, even for initial configuration.
-- If the plugin needs to write files to disk (cache, keys, etc.), it must store them inside the Homebridge storage directory.
-
-### Useful Links
-Note these links are here for help but are not supported/verified by the Homebridge team
-- [Custom Characteristics](https://github.com/homebridge/homebridge-plugin-template/issues/20)
+This project is distributed under the [MIT License](LICENSE)
