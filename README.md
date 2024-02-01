@@ -12,9 +12,12 @@
 ## Description
 
 A [Homebridge](https://homebridge.io/) plugin for the [BlissLights Sky Lite Evolve&reg;](https://blisslights.com/products/sky-lite-evolve)
-star projector. [Seydx](https://github.com/seydx) has an [excellent plugin](https://github.com/seydx/homebridge-star-projector/tree/master)
-for the general category of Tuya-based star projectors, but I have not been able to get it working. Playing around in the
-[Tuya IoT Cloud](https://iot.tuya.com/), I can't find DPS values for any of the characteristics of the Evolve. Hence, this plugin. That
+star projector.
+
+[Seydx](https://github.com/seydx) has an [excellent plugin](https://github.com/seydx/homebridge-star-projector/tree/master)
+for the general category of Tuya-based star projectors, but the Sky Lite Evolve doesn't appear to work with the underlying library, TuyAPI
+(but please let me know if you were able to get it working!). Inspecting the Sky Lite Evolve after adding it to a cloud project in the
+[Tuya IoT Cloud](https://iot.tuya.com/), there don't appear to even be number-based DPS codes. Hence, this plugin. That
 said, this plugin borrows heavily in concept from Seydx's, particularly in how the accessories are mapped.
 
 One thing that is important to note is that, instead of local or remote control using DPS values, this plugin uses the Tuya API directly to
