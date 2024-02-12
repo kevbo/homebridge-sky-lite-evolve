@@ -13,7 +13,14 @@
     "url": "https://github.com/kevbo/homebridge-sky-lite-evolve/issues"
   },
   "keywords": [
-    "homebridge-plugin"
+    "homebridge-plugin",
+    "homebridge",
+    "plugin",
+    "sky lite",
+    "evolve",
+    "blisslights",
+    "star projector",
+    "tuya"
   ],
   "engines": {
     "node": "^18.17.0 || ^20.9.0",
