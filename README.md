@@ -61,7 +61,7 @@ You can contribute to this Homebridge plugin in a number of ways:
 - [Report issues](https://github.com/kevbo/homebridge-sky-lite-evolve/issues) and help verify Pull Requests as they are merged
 - Help review [Pull Requests](https://github.com/kevbo/homebridge-sky-lite-evolve/pulls)
 - Contribute bug fixes
-- Contribute changes to extend the capabilities of this plugin
+- Contribute changes to extend the capabilities of this plugin (see [TODO.md](TODO.md))
 
 ## Credits
 
