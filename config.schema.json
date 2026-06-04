@@ -92,6 +92,13 @@
             "required": true,
             "default": 5,
             "description": "Max number of times to retry API calls"
+          },
+          "connection_timeout": {
+            "title": "Connection Timeout",
+            "type": "number",
+            "required": false,
+            "default": 30000,
+            "description": "HTTP connection timeout in milliseconds. Default is 30 seconds (30000)."
           }
         }
       }
@@ -145,7 +152,8 @@
       "expanded": false,
       "items": [
         "advanced_settings.polling_interval",
-        "advanced_settings.max_api_retries"
+        "advanced_settings.max_api_retries",
+        "advanced_settings.connection_timeout"
       ]
     }
   ]

@@ -2,7 +2,7 @@ import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
 
 import { EvolvePlatform } from './platform';
 
-import { getDeviceInfo, getDeviceStatus, postDeviceCommands } from './tuyaCloudApi';
+import { getDeviceInfo, getDeviceStatus, postDeviceCommands, isTimeoutError, isConnectionRefusedError } from './tuyaCloudApi';
 
 
 interface CloudState {
@@ -73,14 +73,19 @@ export class EvolveProjectorAccessory {
   private async getDeviceDetails() {
     this.platform.log.debug('Fetching device details for <Device ID: ', this.accessory.context.device.TuyaDeviceId);
     try {
-      const device = getDeviceInfo(this.accessory.context.device.TuyaDeviceId, this.platform.config, this.platform.log);
+      const device = await getDeviceInfo(this.accessory.context.device.TuyaDeviceId, this.platform.config, this.platform.log);
       this.platform.log.debug('Device Details: ', device);
       this.cloud_state.initialized = true;
       this.platform.log.debug('Device initialized!');
       return device;
-      this.platform.log.debug('Initial cloud state: ', JSON.stringify(this.cloud_state));
     } catch (error) {
-      this.platform.log.error('Failed to initialize device:', error);
+      if (isTimeoutError(error)) {
+        this.platform.log.error('Failed to initialize device: connection timed out');
+      } else if (isConnectionRefusedError(error)) {
+        this.platform.log.error('Failed to initialize device: connection refused');
+      } else {
+        this.platform.log.error('Failed to initialize device:', error);
+      }
     }
   }
 
@@ -104,14 +109,25 @@ export class EvolveProjectorAccessory {
    * @returns A promise that resolves when the value is successfully set.
    */
   async setOn(value: CharacteristicValue) {
-    // implement your own code to turn your device on/off
     this.platform.log.debug('Set Characteristic On ->', value);
     if (!this.cloud_state.initialized) {
       this.platform.log.debug('Device is not initialized yet. Cannot set new status.');
-    } else if (!this.cloud_state.populated) {
+      throw new this.platform.api.hap.HapStatusError(
+        this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+    }
+    if (!this.cloud_state.populated) {
       this.platform.log.debug('State is not populated yet. Cannot set new status.');
-    } else {
-      await this.updateCloudState('switch_led', value as boolean);
+      throw new this.platform.api.hap.HapStatusError(
+        this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+    }
+    const ok = await this.updateCloudState('switch_led', value as boolean);
+    if (!ok) {
+      // Snap HomeKit back to the actual cloud-reported state so the UI doesn't
+      // claim the toggle succeeded.
+      this.powerSwitchService?.updateCharacteristic(
+        this.platform.Characteristic.On, this.cloud_state.switch_led as boolean);
+      throw new this.platform.api.hap.HapStatusError(
+        this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
     }
   }
 
@@ -170,7 +186,17 @@ export class EvolveProjectorAccessory {
       this.platform.log.debug('Device is not initialized yet. Cannot refresh status.');
     } else {
       this.platform.log.debug(`Refreshing status of <Device ID: ${this.device.result.id}> from Tuya cloud...`);
-      await getDeviceStatus(this.accessory.context.device.TuyaDeviceId, this.platform.config, this.platform.log).then(async (response) => {
+      await getDeviceStatus(this.accessory.context.device.TuyaDeviceId, this.platform.config, this.platform.log).catch((error) => {
+        if (isTimeoutError(error)) {
+          this.platform.log.error('refreshCloudState failed: connection timed out');
+        } else if (isConnectionRefusedError(error)) {
+          this.platform.log.error('refreshCloudState failed: connection refused');
+        } else {
+          throw error;
+        }
+        throw new this.platform.api.hap.HapStatusError(
+          this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+      }).then(async (response) => {
         this.platform.log.debug('Tuya response (response): ', JSON.stringify(response));
         let resultObject: { [key: string]: string } = {};
 
@@ -203,34 +229,48 @@ export class EvolveProjectorAccessory {
    * They're declared above in the interface
    * @returns {Promise<void>} - A promise that resolves when the cloud state is successfully updated.
    */
-  async updateCloudState(code: string, new_value: boolean | string | number): Promise<void> {
+  async updateCloudState(code: string, new_value: boolean | string | number): Promise<boolean> {
     this.platform.log.debug('Pushing new state to Tuya cloud...');
-    await postDeviceCommands(
-      this.accessory.context.device.TuyaDeviceId,
-      this.platform.config,
-      this.platform.log,
-      code,
-      new_value,
-    ).then(async (response) => {
+    try {
+      const response = await postDeviceCommands(
+        this.accessory.context.device.TuyaDeviceId,
+        this.platform.config,
+        this.platform.log,
+        code,
+        new_value,
+      );
       this.platform.log.debug('Response successful: ', String(response.success));
-      if (response.result === true) {
-        // this.platform.log.debug('Successfully pushed new state to Tuya cloud!');
-        this.platform.log.debug('Polling to validate new remote state...');
-        for (let i = 0; i < this.platform.config.advanced_settings.max_api_retries; i++) {
-          this.platform.log.debug('Attempt #' + String(i + 1));
-          await this.refreshCloudState();
-          if (this.cloud_state[code] === new_value) {
-            this.platform.log.debug('New state successfully polled!');
-            return;
-          }
-          // Wait for a short period of time before the next attempt
-          await new Promise(resolve => setTimeout(resolve, this.platform.config.advanced_settings.polling_interval));
-        }
-        this.platform.log.error('Failed to update after ' + this.platform.config.advanced_settings.max_api_retries + ' attempts');
-      } else {
+      if (!response.result) {
         this.platform.log.error('Failed to push new state to Tuya cloud!');
+        return false;
       }
-    });
+      this.platform.log.debug('Polling to validate new remote state...');
+      for (let i = 0; i < this.platform.config.advanced_settings.max_api_retries; i++) {
+        this.platform.log.debug('Attempt #' + String(i + 1));
+        await this.refreshCloudState();
+        if (this.cloud_state[code] === new_value) {
+          this.platform.log.debug('New state successfully polled!');
+          return true;
+        }
+        await new Promise(resolve => setTimeout(resolve, this.platform.config.advanced_settings.polling_interval));
+      }
+      this.platform.log.error(
+        `Device did not reach ${code}=${String(new_value)} after ` +
+        `${this.platform.config.advanced_settings.max_api_retries} polls`);
+      return false;
+    } catch (error) {
+      if (isTimeoutError(error)) {
+        this.platform.log.error('updateCloudState failed: connection timed out');
+        throw new this.platform.api.hap.HapStatusError(
+          this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+      } else if (isConnectionRefusedError(error)) {
+        this.platform.log.error('updateCloudState failed: connection refused');
+        throw new this.platform.api.hap.HapStatusError(
+          this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+      }
+      this.platform.log.error('updateCloudState failed:', error);
+      return false;
+    }
   }
 }
 

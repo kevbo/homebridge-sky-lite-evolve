@@ -5,6 +5,23 @@ import * as qs from 'qs';
 import axios from 'axios';
 import * as crypto from 'crypto';
 
+const DEFAULT_TIMEOUT_MS = 30000;
+
+function createHttpClient(config: PlatformConfig) {
+  return axios.create({
+    baseURL: config.cloud_credentials.tuya_region,
+    timeout: config.advanced_settings?.connection_timeout ?? DEFAULT_TIMEOUT_MS,
+  });
+}
+
+export function isTimeoutError(err: unknown): boolean {
+  return axios.isAxiosError(err) && (err.code === 'ECONNABORTED' || err.code === 'ERR_CANCELED');
+}
+
+export function isConnectionRefusedError(err: unknown): boolean {
+  return axios.isAxiosError(err) && err.code === 'ECONNREFUSED';
+}
+
 
 export async function getTuyaToken(config: PlatformConfig, logger: Logger): Promise<string> {
   const method = 'GET';
@@ -21,9 +38,7 @@ export async function getTuyaToken(config: PlatformConfig, logger: Logger): Prom
     sign: await encryptStr(signStr, config.cloud_credentials.tuya_secret_key),
   };
 
-  const httpClient = axios.create({
-    baseURL: config.cloud_credentials.tuya_region,
-  });
+  const httpClient = createHttpClient(config);
 
   const { data: login } = await httpClient.get('/v1.0/token?grant_type=1', { headers });
   logger.debug(JSON.stringify(headers));
@@ -41,9 +56,7 @@ export async function getDeviceInfo(deviceId: string, config: PlatformConfig, lo
   const url = `/v1.0/devices/${deviceId}`;
   const reqHeaders: { [k: string]: string } = await getRequestSign(url, method, {}, query, {}, config, token);
 
-  const httpClient = axios.create({
-    baseURL: config.cloud_credentials.tuya_region,
-  });
+  const httpClient = createHttpClient(config);
 
   const { data } = await httpClient.request({
     method,
@@ -66,9 +79,7 @@ export async function getDeviceStatus(deviceId: string, config: PlatformConfig, 
   const url = `/v1.0/devices/${deviceId}/status`;
   const reqHeaders: { [k: string]: string } = await getRequestSign(url, method, {}, query, {}, config, token);
 
-  const httpClient = axios.create({
-    baseURL: config.cloud_credentials.tuya_region,
-  });
+  const httpClient = createHttpClient(config);
 
   const { data } = await httpClient.request({
     method,
@@ -105,9 +116,7 @@ export async function postDeviceCommands(
   } ;
   const reqHeaders: { [k: string]: string } = await getRequestSign(url, method, {}, query, body, config, token);
 
-  const httpClient = axios.create({
-    baseURL: config.cloud_credentials.tuya_region,
-  });
+  const httpClient = createHttpClient(config);
 
   const { data } = await httpClient.request({
     method,

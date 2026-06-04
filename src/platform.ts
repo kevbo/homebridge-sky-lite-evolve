@@ -3,7 +3,7 @@ import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 import { EvolveProjectorAccessory } from './projectorAccessory';
 
-import { getDeviceInfo } from './tuyaCloudApi';
+import { getDeviceInfo, isTimeoutError, isConnectionRefusedError } from './tuyaCloudApi';
 
 
 /**
@@ -30,10 +30,11 @@ export class EvolvePlatform implements DynamicPlatformPlugin {
     // Dynamic Platform plugins should only register new accessories after this event was fired,
     // in order to ensure they weren't added to homebridge already. This event can also be used
     // to start discovery of new accessories.
-    this.api.on('didFinishLaunching', async () => {
+    this.api.on('didFinishLaunching', () => {
       this.log.debug('Executed didFinishLaunching callback');
-      // run the method to discover / register your devices as accessories
-      this.discoverDevices();
+      this.discoverDevices().catch((error) => {
+        this.log.error('Unhandled error during device discovery:', error);
+      });
     });
   }
 
@@ -65,7 +66,19 @@ export class EvolvePlatform implements DynamicPlatformPlugin {
   async discoverDevices() {
     // loop over the discovered devices and register each one
     for (const projector of this.config.projectors) {
-      const response = await getDeviceInfo(projector.tuya_device_id, this.config, this.log);
+      let response;
+      try {
+        response = await getDeviceInfo(projector.tuya_device_id, this.config, this.log);
+      } catch (error) {
+        if (isTimeoutError(error)) {
+          this.log.error(`Failed to discover projector ${projector.tuya_device_id}: connection timed out`);
+        } else if (isConnectionRefusedError(error)) {
+          this.log.error(`Failed to discover projector ${projector.tuya_device_id}: connection refused`);
+        } else {
+          this.log.error(`Failed to discover projector ${projector.tuya_device_id}:`, error);
+        }
+        continue;
+      }
       this.log.debug('Discovered projector:', response);
       this.devices.push({
         UniqueId: response.result.uuid,
